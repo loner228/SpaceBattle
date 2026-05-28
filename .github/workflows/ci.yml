@@ -1,0 +1,63 @@
+﻿name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  build-test-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore SpaceBattle/SpaceBattle.sln
+
+      - name: Build (no restore)
+        run: dotnet build SpaceBattle/SpaceBattle.sln --configuration Release --no-restore
+
+      - name: Test (no build) with coverage
+        run: |
+          dotnet test SpaceBattle/SpaceBattle.sln \
+            --configuration Release \
+            --no-build \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      - name: Locate coverage file
+        id: coverage
+        run: |
+          FILE=$(find ./TestResults -name "coverage.cobertura.xml" | head -n 1)
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+          echo "Found coverage file: $FILE"
+
+      - name: Generate coverage summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: ${{ steps.coverage.outputs.file }}
+          badge: true
+          fail_below_min: true
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: "90 90"
+
+      - name: Comment coverage on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          path: code-coverage-results.md
