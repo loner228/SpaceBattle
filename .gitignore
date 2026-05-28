@@ -1,0 +1,34 @@
+﻿## .NET build outputs
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Ll]og/
+[Ll]ogs/
+
+## User files
+*.user
+*.suo
+*.csproj.user
+
+## IDE
+.vs/
+.vscode/
+.idea/
+
+## Test / coverage results
+[Tt]est[Rr]esult*/
+coverage*.xml
+coverage*.json
+*.coverage
+*.coveragexml
+
+## OS
+.DS_Store
+Thumbs.db
